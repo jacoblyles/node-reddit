@@ -33,8 +33,9 @@ cli.main(function (args, options) {
     uri: "http://www.reddit.com/api/login/" + USER,
     user: USER,
     headers: {
-      Host: "www.reddit.com",
-      Connection: "Keep-Alive"
+		  "Host": "www.reddit.com",
+		  "Connection": "Keep-Alive",
+		  "User-Agent": "logged-in node-reddit bot by /u/jacoblyles"
     },
     form:{
       user: USER,
@@ -46,13 +47,18 @@ cli.main(function (args, options) {
 
 
   request.post(apiOptions, function(err, res, body){
+    if (err){
+      console.error(err);
+    }
     var data = JSON.parse(body);
     cookie = data.cookie;
     uh = data.modhash;
     apiOptions = {
       uri: 'http://reddit.com/.json',
       headers: {
-        Cookie: cookie
+        "Cookie": cookie,
+        "User-Agent": "logged-in node-reddit bot by /u/jacoblyles",
+        "Host": "www.reddit.com",
       }
     };
 

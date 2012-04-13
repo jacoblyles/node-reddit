@@ -9,7 +9,11 @@ $ node app.js
 To use with login, do one of the following: 
 ```bash
 $ node app.js -u username -p password
+```
+```bash
 $ node app.js --user username --paswd password
+```
+```bash
 $ node app.js username password
 ```
 
@@ -18,4 +22,5 @@ Reddit rate limits logins, so this will only work a few times in a ten minute in
 Have fun!
 
 [Kamranicus](http://kamranicus.com)
+
 [jacoblyles](http://jacoblyles.com)

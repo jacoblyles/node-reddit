@@ -10,9 +10,11 @@ To use with login, do one of the following:
 ```bash
 $ node app.js -u username -p password
 ```
+
 ```bash
 $ node app.js --user username --paswd password
 ```
+
 ```bash
 $ node app.js username password
 ```

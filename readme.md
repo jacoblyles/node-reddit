@@ -8,11 +8,8 @@ $ node app.js
 
 To use with login, do one of the following: 
 ```bash
-
 $ node app.js -u username -p password
-
 $ node app.js --user username --paswd password
-
 $ node app.js username password
 ```
 

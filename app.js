@@ -1,76 +1,109 @@
-#!/usr/bin/env node
+// 
+// reddit ["fetch"]  - fetches frontpage
+// reddit fetch <subreddit>
+// reddit login username password
+// reddit logout
+// reddit orangred - requires login
+// reddit messages - requires login
+// 
 
-/********************
- * Node-Reddit
- *
- * A simple CLI app that reads in Reddit's frontpage and colorizes it
- * with optional login info passed in at the command line 
- * username is passed with -u, --user, or first arg
- * passwd is passed with -p, --passwd, or second arg
- * 
- * by Kamran Ayub and Jacob Lyles
- * License: WTFPL (http://sam.zoy.org/wtfpl/)
- * Attribution is cool but not required
- ********************/
+var fs = require('fs');
+var path = require('path');
+var _ = require('underscore');
+var request = require('request');
+var colors = require('colors');
+var cli = require('cli');
 
-var cli     = require('cli'),
-		http    = require('http'),
-		request = require('request'),
-		argv    = require('optimist').argv,
-		colors  = require('colors');
+var argv = require('optimist').argv;
 
-var cookie, uh;
-var USER = argv.u || argv.user || argv._[0];
-var PASSWD = argv.p || argv.passwd || argv._[1];
+var reddit_cookie, reddit_user;
 
-var login = function(opts, cb){
-		var apiOptions = {
-		uri: "http://www.reddit.com/api/login/" + USER,
-		user: USER,
-		headers: {
-			"Host": "www.reddit.com",
-			"Connection": "Keep-Alive",
-			"User-Agent": "logged-in node-reddit bot by /u/jacoblyles"
-		},
-		form:{
-			user: USER,
-			passwd: PASSWD,
-			api_type: "json" 
-		},
-		followAllRedirects: true
-	};
-
-	request.post(apiOptions, function(err, res, body){
-		if (err){
-			console.error(err);
-		}
-		var data = JSON.parse(body);
-		cookie = data.json.data.cookie;
-		console.log("cookie is", cookie);
-		console.log(body, res.headers);
-		uh = data.modhash;
-		cb();
-	});
-
+var defaults = {
+	headers: {
+		"User-Agent": "node-reddit bot by /u/jacoblyles",
+		"Host": "www.reddit.com"
+	}
 };
 
 
-var fetch = function(opts, cb){
-	apiOptions = {
-		uri: 'http://reddit.com/.json',
-		headers: {
-			"Cookie": cookie,
-			"User-Agent": "logged-in node-reddit bot by /u/jacoblyles",
-			"Host": "www.reddit.com",
+var login = exports.login = function(login, passwd, cb){
+	var opts = _.extend(defaults, {
+		uri: "http://www.reddit.com/api/login/" + login,
+		form:{
+			user: login,
+			passwd: passwd,
+			api_type: "json" 
+		},
+		followAllRedirects: true
+	});
+
+	request.post(opts, function(err, res, body){
+		if (err){
+			console.error(err);
+			return;
 		}
+		var data = JSON.parse(body);
+		console.log(data);
+		reddit_cookie = data.json.data.cookie;
+		reddit_user = login;
+		storeCookie(reddit_cookie, reddit_user);
+	});
+};
+
+function storeCookie(cookie, user){
+	var fs = require('fs');
+	var dataFile = fs.openSync('./data/myData', 'w');
+	fs.writeSync(dataFile, JSON.stringify({
+		cookie: cookie,
+		user: user
+	}));
+	console.log(cookie,user);
+}
+
+function readCookie(){
+	if (!path.existsSync('./data/myData')){
+		return;
 	}
+	var contents = fs.readFileSync('./data/myData');
+	console.log(contents.toString());
+	return contents && JSON.parse(contents.toString());
+}
 
-	console.log(apiOptions);
+function _logout(){
+	console.log("logging out " + reddit_user);
+	reddit_cookie = null;
+	reddit_user = null;
+	fs.unlinkSync('./data/myData');
+}
 
-	request(apiOptions, function (err, res, body) {
+function _login(){
+
+}
+
+require('http').createServer(function(req, res){
+	console.log(req.headers);
+}).listen(8888);
+
+exports.fetch = function(subreddit){
+	console.log(subreddit);
+	var jar = request.jar();
+	var cookie = request.cookie("reddit_session=12502917%2C2012-05-19T02%3A28%3A56%2C86eada60d62621ff5dbb84e5ec7eb6a6398ea49b");
+	jar.add(cookie);
+
+	var opts  = _.extend(defaults, {
+		uri : subreddit ? "http://reddit.com/r/" + subreddit + "/.json" : "http://www.reddit.com/.json",
+		jar: jar
+	});
+
+	console.log(opts);
+
+	request(opts, function(err, res, body){
+		if (err){
+			console.log(err);
+		}
 		if (!err && res.statusCode === 200) {
 			var reddit  = JSON.parse(body),
-					stories = reddit.data.children.map(function (s) { 
+				stories = reddit.data.children.map(function (s) { 
 											return s.data; 
 										});
 			
@@ -85,7 +118,6 @@ var fetch = function(opts, cb){
 
 				// Build row
 				// [score] [title] [comments] [subreddit]
-				// This sucks
 				row += story.score.toString().green + "\t";
 				row += title.bold
 				row += " (" + story.domain + ")";
@@ -94,23 +126,47 @@ var fetch = function(opts, cb){
 				row += story.author.grey;     
 				row += " " + (story.num_comments + " comments").italic.yellow;
 				row += "\n";
-
 				console.log(row);
 			});
 		}
+
 	});
 }
+
+
+var commands = {};
+commands["login"] = exports.login;
+commands["fetch"] = exports.fetch;
 
 
 cli.main(function (args, options) {
 	console.log("***********".rainbow);
 	console.log("Node Reddit".cyan);
 	console.log("***********\n\n".rainbow);
-	
-	if (USER && PASSWD){
-		login({}, fetch);
-	} else { 
-		fetch();
+	var userData = readCookie();
+	if (userData){
+		reddit_user = userData.user;
+		reddit_cookie = userData.cookie;
+	}
+
+	command = argv._[0] || "fetch";
+	if(commands[command]){
+		console.log("command is", command);
+		console.log(argv);
+		commands[command].apply({}, argv._.slice(1));
+	} else {
+		console.log("invalid command")
 	}
 });
+
+
+
+
+
+
+
+
+
+
+
 

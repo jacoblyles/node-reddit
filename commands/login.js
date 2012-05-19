@@ -2,6 +2,8 @@
 var config = require('../config');
 var request = require('request');
 var path = require('path');
+var fs = require('fs');
+
 
 // uh is used by some reddit API post methods
 var info = {
@@ -29,7 +31,7 @@ exports.login = function(username, password){
 		}
 		var data = JSON.parse(body);
 		info.cookie = data.json.data.cookie;
-		info.login = login;
+		info.login = username;
 		info.uh = data.json.data.uh;
 		writeLogin();
 	});
@@ -48,6 +50,10 @@ exports.getUser = function(){
 	return info.login;
 }
 
+exports.getCookie = function(){
+	return info.cookie;
+}
+
 exports.printInfo = function(){
 	console.log("\nlogged in as:", info.user);
 }
@@ -61,7 +67,6 @@ function readLogin(){
 }
 
 function writeLogin(){
-	var fs = require('fs');
 	var dataFile = fs.openSync(config.loginFile, 'w');
 	fs.writeSync(dataFile, JSON.stringify(info));
 }

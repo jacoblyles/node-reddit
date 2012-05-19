@@ -1,21 +1,23 @@
+var config = require('../config');
 var login = require('./login');
 var request = require('request');
 var colors = require('colors');
-
+var _ = require('underscore');
 
 exports.fetch = function(subreddit){
 	
 	// use cookie if available
 	var jar = request.jar();
 	if (login.isLoggedIn()){
-		var cookie = request.cookie("reddit_session=" + reddit_cookie);
+		var cookie = request.cookie("reddit_session=" + login.getCookie());
 		jar.add(cookie);
 	}
 
-	var opts  = _.extend(defaults, {
+	var opts  = {
 		uri : subreddit ? "http://reddit.com/r/" + subreddit + "/.json" : "http://www.reddit.com/.json",
-		jar: jar
-	});
+		jar: jar,
+		headers: config.headers
+	};
 
 	request(opts, function(err, res, body){
 		if (err){

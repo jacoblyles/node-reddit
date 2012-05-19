@@ -1,164 +1,76 @@
-// 
-// reddit ["fetch"]  - fetches frontpage
-// reddit fetch <subreddit>
-// reddit login username password
-// reddit logout
-// reddit orangred - requires login
-// reddit messages - requires login
-// 
-
-var fs = require('fs');
-var path = require('path');
 var _ = require('underscore');
 var request = require('request');
-var colors = require('colors');
 var cli = require('cli');
-
+var colors = require('colors');
 var argv = require('optimist').argv;
 
-var reddit_cookie, reddit_user;
+function printUsage(command){
+	commands.forEach(function(item){
+		console.log("\n" + item.usage.bold.cyan);
+		console.log("description: ".bold.green + item.description);
+	});
+}
 
-var defaults = {
-	headers: {
-		"User-Agent": "node-reddit bot by /u/jacoblyles",
-		"Host": "www.reddit.com"
+var commands = [
+	{
+		name: "login",
+		usage: "reddit login <username> <password>",
+		description: "logs in as <username>",
+		func: require('./commands/login').login
+	},
+	{
+		name: "logout",
+		usage: "reddit logout",
+		description: "logs out of reddit",
+		func: require('./commands/login').logout
+	},
+	{
+		name: "fetch",
+		usage: "reddit fetch [subreddit]",
+		description: "displays the top 25 stories from the front page, or an optional subreddit",
+		func: require('./commands/fetch').fetch
+	},
+	{
+		name: "orangred",
+		usage: "reddit oragered",
+		description: "displays your orangereds. Requires login.",
+		func: require('./commands/messages').oragered
+	},
+	{
+		name: "messages",
+		usage: "reddit messages",
+		description: "displays your last 10 messages. Requires login.",
+		func: require('./commands/messages').messages
+	},
+	{
+		name: "status",
+		usage: "reddit status",
+		description: "shows logged-in state"
+	},
+	{
+		name: "help",
+		usage: "reddit help",
+		description: "print this help text",
+		func: printUsage
 	}
-};
+]
 
 
-var login = exports.login = function(login, passwd, cb){
-	var opts = _.extend(defaults, {
-		uri: "http://www.reddit.com/api/login/" + login,
-		form:{
-			user: login,
-			passwd: passwd,
-			api_type: "json" 
-		},
-		followAllRedirects: true
-	});
-
-	request.post(opts, function(err, res, body){
-		if (err){
-			console.error(err);
-			return;
-		}
-		var data = JSON.parse(body);
-		console.log(data);
-		reddit_cookie = data.json.data.cookie;
-		reddit_user = login;
-		storeCookie(reddit_cookie, reddit_user);
-	});
-};
-
-function storeCookie(cookie, user){
-	var fs = require('fs');
-	var dataFile = fs.openSync('./data/myData', 'w');
-	fs.writeSync(dataFile, JSON.stringify({
-		cookie: cookie,
-		user: user
-	}));
-	console.log(cookie,user);
-}
-
-function readCookie(){
-	if (!path.existsSync('./data/myData')){
-		return;
-	}
-	var contents = fs.readFileSync('./data/myData');
-	console.log(contents.toString());
-	return contents && JSON.parse(contents.toString());
-}
-
-function _logout(){
-	console.log("logging out " + reddit_user);
-	reddit_cookie = null;
-	reddit_user = null;
-	fs.unlinkSync('./data/myData');
-}
-
-function _login(){
-
-}
-
-require('http').createServer(function(req, res){
-	console.log(req.headers);
-}).listen(8888);
-
-exports.fetch = function(subreddit){
-	console.log(subreddit);
-	var jar = request.jar();
-	var cookie = request.cookie("reddit_session=12502917%2C2012-05-19T02%3A28%3A56%2C86eada60d62621ff5dbb84e5ec7eb6a6398ea49b");
-	jar.add(cookie);
-
-	var opts  = _.extend(defaults, {
-		uri : subreddit ? "http://reddit.com/r/" + subreddit + "/.json" : "http://www.reddit.com/.json",
-		jar: jar
-	});
-
-	console.log(opts);
-
-	request(opts, function(err, res, body){
-		if (err){
-			console.log(err);
-		}
-		if (!err && res.statusCode === 200) {
-			var reddit  = JSON.parse(body),
-				stories = reddit.data.children.map(function (s) { 
-											return s.data; 
-										});
-			
-			// Descending score
-			stories.sort(function (a, b) { return b.score - a.score; });
-
-			stories.forEach(function (story) {
-				var row = "",
-					title = story.title.length > 100
-								? story.title.substr(0, 100) + "..." 
-								: story.title;
-
-				// Build row
-				// [score] [title] [comments] [subreddit]
-				row += story.score.toString().green + "\t";
-				row += title.bold
-				row += " (" + story.domain + ")";
-				row += (" /r/" + story.subreddit).cyan;
-				row += "\n\t";
-				row += story.author.grey;     
-				row += " " + (story.num_comments + " comments").italic.yellow;
-				row += "\n";
-				console.log(row);
-			});
-		}
-
-	});
-}
-
-
-var commands = {};
-commands["login"] = exports.login;
-commands["fetch"] = exports.fetch;
-
-
-cli.main(function (args, options) {
+if (require.main === module) {
 	console.log("***********".rainbow);
 	console.log("Node Reddit".cyan);
 	console.log("***********\n\n".rainbow);
-	var userData = readCookie();
-	if (userData){
-		reddit_user = userData.user;
-		reddit_cookie = userData.cookie;
-	}
 
 	command = argv._[0] || "fetch";
-	if(commands[command]){
-		console.log("command is", command);
-		console.log(argv);
-		commands[command].apply({}, argv._.slice(1));
-	} else {
-		console.log("invalid command")
-	}
-});
 
+	command = commands.filter(function(item){ return item.name === command})[0];
+	if (!command){
+		console.log("invalid command");
+		printUsage();
+	} else {
+		command.func.apply({}, argv._.slice(1));	
+	}
+}
 
 
 

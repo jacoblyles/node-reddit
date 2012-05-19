@@ -3,6 +3,7 @@ var config = require('../config');
 var request = require('request');
 var path = require('path');
 var fs = require('fs');
+var colors = require('colors');
 
 
 // uh is used by some reddit API post methods
@@ -35,6 +36,7 @@ exports.login = function(username, password){
 		info.uh = data.json.data.uh;
 		writeLogin();
 	});
+	console.log("logged in as ", info.login.cyan);
 }
 
 exports.isLoggedIn = function(){
@@ -42,6 +44,7 @@ exports.isLoggedIn = function(){
 }
 
 exports.logout = function(){
+	console.log("logging out ", info.login.cyan);
 	info = {};
 	writeLogin();
 }

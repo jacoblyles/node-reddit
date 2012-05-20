@@ -1,29 +1,39 @@
-# Node Reddit
+node-reddit
+========
 
-To use:
+node-reddit is designed to let you waste more time on reddit at the command line. 
 
-```bash
-$ node app.js
-```
+First install [npm](http://npmjs.org/). Then you can install this project with 
 
-To use with login, do one of the following: 
+   $ npm install -g reddit
+   
+Then you can use the following commands to browse reddit:
 
-```bash
-$ node app.js -u username -p password
-```
+    reddit login <username> <password>
+description: logs in as <username>
 
-```bash
-$ node app.js --user username --paswd password
-```
+    reddit logout
+description: logs out of reddit
 
-```bash
-$ node app.js username password
-```
+    reddit fetch [subreddit]
+description: displays the top 25 stories from the front page, or an optional subreddit
 
-Reddit rate limits logins, so this will only work a few times in a ten minute interval, after which reddit will return the un-logged in front page. The next feature will be to cache cookies on disk so we don't have to login with every run. 
+    reddit oragered
+description: displays your orangereds. Requires login.
 
-Have fun!
+    reddit messages
+description: displays your last 10 messages. Requires login.
 
+    reddit status
+description: shows logged-in state
+
+    reddit help
+description: print this help text
+
+
+
+
+contributors:
+
+jacoblyles
 [Kamranicus](http://kamranicus.com)
-
-[jacoblyles](http://jacoblyles.com)

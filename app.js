@@ -1,6 +1,5 @@
 var _ = require('underscore');
 var request = require('request');
-var cli = require('cli');
 var colors = require('colors');
 var argv = require('optimist').argv;
 
@@ -45,7 +44,8 @@ var commands = [
 	{
 		name: "status",
 		usage: "reddit status",
-		description: "shows logged-in state"
+		description: "shows logged-in state",
+		func: require('./commands/login').printInfo	
 	},
 	{
 		name: "help",

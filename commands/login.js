@@ -58,7 +58,7 @@ exports.getCookie = function(){
 }
 
 exports.printInfo = function(){
-	console.log("\nlogged in as:", info.user);
+	console.log("\nlogged in as:", info.login);
 }
 
 function readLogin(){

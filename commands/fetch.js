@@ -6,24 +6,19 @@ var _ = require('underscore');
 
 exports.fetch = function(subreddit){
 	
-	// use cookie if available
-	var jar = request.jar();
-	if (login.isLoggedIn()){
-		var cookie = request.cookie("reddit_session=" + login.getCookie());
-		jar.add(cookie);
-	}
-
 	var opts  = {
 		uri : subreddit ? "http://reddit.com/r/" + subreddit + "/.json" : "http://www.reddit.com/.json",
-		jar: jar,
-		headers: config.headers
+		headers: _.extend(config.headers,{
+			cookie: login.getCookie()
+		})
 	};
 
 	request(opts, function(err, res, body){
 		if (err){
 			console.log(err);
+			return;
 		}
-		if (!err && res.statusCode === 200) {
+		if (res.statusCode === 200) {
 			var reddit  = JSON.parse(body),
 				stories = reddit.data.children.map(function (s) { 
 											return s.data; 

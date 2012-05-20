@@ -31,10 +31,10 @@ var commands = [
 		func: require('./commands/fetch').fetch
 	},
 	{
-		name: "orangred",
+		name: "orangered",
 		usage: "reddit oragered",
 		description: "displays your orangereds. Requires login.",
-		func: require('./commands/messages').oragered
+		func: require('./commands/messages').orangered
 	},
 	{
 		name: "messages",

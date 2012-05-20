@@ -31,12 +31,12 @@ exports.login = function(username, password){
 			return;
 		}
 		var data = JSON.parse(body);
-		info.cookie = data.json.data.cookie;
+		info.cookie = "reddit_session=" + data.json.data.cookie;
 		info.login = username;
 		info.uh = data.json.data.uh;
 		writeLogin();
+		console.log("logged in as ", info.login.cyan);
 	});
-	console.log("logged in as ", info.login.cyan);
 }
 
 exports.isLoggedIn = function(){
@@ -76,4 +76,4 @@ function writeLogin(){
 
 // when importing this module, check the file system to see if we're logged in.
 info = readLogin();
-
+console.log(info.login ? "logged in as " + info.login : "");

@@ -1,0 +1,33 @@
+{
+  "name": "reddit",
+  "version": "0.1.0",
+  "author": "jacoblyles <jacob.lyles@gmail.com>",
+  "description": "waste more time on reddit from your command line",
+  "contributors": [
+    {
+      "name": "Kamranicus"
+    }
+  ],
+  "bin": {
+    "reddit": "./app.js"
+  },
+  "main": "./app.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jacoblyles/node-reddit.git"
+  },
+  "keywords": [
+    "reddit"
+  ],
+  "dependencies": {
+    "colors": "~0.6.*",
+    "optimist": "~0.3.*",
+    "request": "~2.9.*",
+    "underscore": "~1.3.*",
+    "wordwrap": "0.0.*"
+  },
+  "license": "DWTFYW",
+  "engine": {
+    "node": ">=0.6.*"
+  }
+}

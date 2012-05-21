@@ -10,7 +10,7 @@ First install [npm](http://npmjs.org/). Then you can install this project with
 Then you can use the following commands to browse reddit:
 
     reddit login <username> <password>
-description: logs in as <username>
+description: logs in as username
 
     reddit logout
 description: logs out of reddit

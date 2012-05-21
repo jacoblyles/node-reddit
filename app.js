@@ -1,7 +1,10 @@
+#!/usr/bin/env node
+
 var _ = require('underscore');
 var request = require('request');
 var colors = require('colors');
 var argv = require('optimist').argv;
+var config = require('./config');
 
 function printUsage(command){
 	commands.forEach(function(item){
@@ -60,16 +63,18 @@ if (require.main === module) {
 	console.log("***********".rainbow);
 	console.log("Node Reddit".cyan);
 	console.log("***********\n\n".rainbow);
+	config.ensureDataDir(function(){
 
-	command = argv._[0] || "fetch";
+		command = argv._[0] || "fetch";
 
-	command = commands.filter(function(item){ return item.name === command})[0];
-	if (!command){
-		console.log("invalid command");
-		printUsage();
-	} else {
-		command.func.apply({}, argv._.slice(1));	
-	}
+		command = commands.filter(function(item){ return item.name === command})[0];
+		if (!command){
+			console.log("invalid command");
+			printUsage();
+		} else {
+			command.func.apply({}, argv._.slice(1));	
+		}
+	});
 }
 
 

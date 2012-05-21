@@ -26,6 +26,10 @@
     "request": "~2.9.202",
     "underscore": "~1.3.3"
   },
+  "directories" :{
+    "data": "data",
+    "commands": "commands"
+  },
   "license": "DWTFYW",
   "engine": {
     "node": ">=0.6.*"

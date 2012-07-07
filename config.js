@@ -14,7 +14,7 @@ var dataDir = "~/.reddit";
 exports.dataDir = dataDir.replace(/^~\//, process.env.HOME + '/');
 
 exports.ensureDataDir = function(cb){
-	if (!path.existsSync(exports.dataDir)){ 
+	if (!fs.existsSync(exports.dataDir)){ 
 		exec('mkdir '+ exports.dataDir, function(err, stdout, stderr){
 			return;
 		});

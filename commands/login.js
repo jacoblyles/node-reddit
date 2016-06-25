@@ -62,7 +62,7 @@ exports.printInfo = function(){
 }
 
 function readLogin(){
-	if (!path.existsSync(config.loginFile)){
+	if (!fs.existsSync(config.loginFile)){
 		return {};
 	}
 	var contents = fs.readFileSync(config.loginFile);
